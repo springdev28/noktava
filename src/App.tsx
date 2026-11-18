@@ -12,6 +12,7 @@ import './brand.css'
 function Pages() {
   const { t } = useI18n()
   const { path } = useRouter()
-  return <AppShell>{path === '/' ? <HomePage /> : path === '/studio' ? <StudioPage /> : path === '/encode' ? <EncodePage /> : path === '/decode' ? <DecodePage /> : path === '/guide' ? <GuidePage /> : <div className="studio-empty"><h1>{t('Bu sayfa bulunamadı.')}</h1><Link href="/studio" className="studio-button primary">{t('Stüdyoya dön')}</Link></div>}</AppShell>
+  if (path === '/') return <HomePage />
+  return <AppShell>{path === '/studio' ? <StudioPage /> : path === '/encode' ? <EncodePage /> : path === '/decode' ? <DecodePage /> : path === '/guide' ? <GuidePage /> : <div className="studio-empty"><h1>{t('Bu sayfa bulunamadı.')}</h1><Link href="/studio" className="studio-button primary">{t('Stüdyoya dön')}</Link></div>}</AppShell>
 }
 export default function App() { return <I18nProvider><Router><StudioProvider><Pages /></StudioProvider></Router></I18nProvider> }

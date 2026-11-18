@@ -38,7 +38,7 @@ The [Figma file](https://www.figma.com/design/CLb4yxWNUk33Qe5yxZ93BQ) contains t
 
 Each page has its own URL. Internal navigation and browser back/forward preserve the in-memory working audio. Refreshing or closing the page clears the session. The included `public/.htaccess` configures Hostinger's static hosting to serve `index.html` for application routes. Vite's development and preview servers already do this. The old `/#workspace` address opens `/studio`.
 
-The homepage is part of the application workspace. Website copy contains practical usage instructions, without promotional sections or explanations of the underlying method. Implementation details remain in repository documentation.
+The homepage retains the sound sculpture, waveform artwork and spacious visual layout, with direct access to each tool. Website copy contains practical usage instructions, without promotional sections or explanations of the underlying method. Implementation details remain in repository documentation.
 
 ## Audio studio
 
