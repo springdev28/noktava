@@ -11,7 +11,7 @@ export function NoteEditor({ disabled = false }: { disabled?: boolean }) {
   const { settings, setSettings, busy, midiScore, setMidiScore, midiTrack, setMidiTrack } = useStudio()
   const [mode, setMode] = useState<'manual' | 'midi'>(midiScore ? 'midi' : 'manual')
   const [error, setError] = useState(''), [loading, setLoading] = useState(false), [page, setPage] = useState(0)
-  const [help, setHelp] = useState(() => { try { return !localStorage.getItem('noktava.midiHelpSeen') } catch { return true } })
+  const [help, setHelp] = useState(false)
   const input = useRef<HTMLInputElement>(null)
   const locked = disabled || !!busy || loading
   let cursor = 0
@@ -31,11 +31,11 @@ export function NoteEditor({ disabled = false }: { disabled?: boolean }) {
     catch (e) { setError((e as Error).message) }
     finally { setLoading(false) }
   }
-  function closeHelp() { setHelp(false); try { localStorage.setItem('noktava.midiHelpSeen', '1') } catch { /* Help remains available. */ } }
+  function closeHelp() { setHelp(false) }
   return <section className="studio-card note-editor">
-    <div className="card-heading"><h2><Music2 size={16} />{t('Notalar', 'Notes')}</h2><button type="button" className="text-button" onClick={() => setHelp(!help)}><HelpCircle size={14} />{t('MIDI nedir?', 'What is MIDI?')}</button></div>
+    <div className="card-heading"><h2><Music2 size={16} />{t('Notalar', 'Notes')}</h2><button type="button" className="text-button" onClick={() => setHelp(!help)}><HelpCircle size={14} />{t('Nota girişi yardımı', 'Note input help')}</button></div>
     {help && <div className="midi-help"><button type="button" className="studio-icon-button" aria-label={t('Yardımı kapat', 'Close help')} onClick={closeHelp}><X size={16} /></button><ol>
-      <li><strong>{t('Ses başka, nota başka.', 'Audio and notes are different.')}</strong><span>{t('MP3 ve WAV ses kaydıdır. MIDI, nota adı, oktav, başlangıç ve süre bilgisidir.', 'MP3 and WAV contain recorded sound. MIDI describes each note’s pitch, octave, start and duration.')}</span></li>
+
       <li><strong>{t('MIDI yükle veya elle gir.', 'Import MIDI or enter notes.')}</strong><span>{t('Şarkının ilgili bölümüne ait .mid dosyasını kullan. MIDI yoksa notaları aşağıda düzenle.', 'Use a .mid file for the relevant part of your song, or enter the notes below.')}</span></li>
       <li><strong>{t('Önizlemeyi kontrol et.', 'Check the preview.')}</strong><span>{t('Notaları kontrol edip şifrele. Alıcının MIDI dosyasına ihtiyacı yok.', 'Check the notes, then encrypt. The recipient does not need the MIDI file.')}</span></li>
     </ol></div>}
@@ -49,6 +49,6 @@ export function NoteEditor({ disabled = false }: { disabled?: boolean }) {
     {notes.length > 32 && <div className="note-pages"><button type="button" disabled={page === 0} onClick={() => setPage(page - 1)}>{t('Önceki', 'Previous')}</button><span>{page + 1} / {Math.ceil(notes.length / 32)}</span><button type="button" disabled={(page + 1) * 32 >= notes.length} onClick={() => setPage(page + 1)}>{t('Sonraki', 'Next')}</button></div>}
     <div className="note-footer"><button type="button" className="studio-button subtle compact" disabled={notes.length >= 8192 || locked} onClick={() => { putNotes([...notes, { midi: 60, duration: 2, startSeconds: end, durationSeconds: 60 / settings.bpm }]); setPage(Math.floor(notes.length / 32)) }}><Plus size={14} />{t('Nota ekle')}</button><label>{t('Tempo ')}<input aria-label={t('Tempo (BPM)')} type="number" min="40" max="240" value={settings.bpm} disabled={locked || settings.timing === 'timeline'} onChange={e => { const bpm = Number(e.target.value); if (bpm >= 40 && bpm <= 240) setSettings(s => ({ ...s, bpm, notes: s.timing ? notes.map(n => ({ ...n, startSeconds: n.startSeconds * s.bpm / bpm, durationSeconds: n.durationSeconds * s.bpm / bpm })) : s.notes })) }} />BPM</label></div>
     <label className="repeat-notes"><input type="checkbox" checked={!settings.timing || settings.timing === 'loop'} disabled={locked} onChange={e => setSettings(s => ({ ...s, notes, timing: e.target.checked ? 'loop' : 'timeline' }))} />{t('Nota dizisini tekrarla', 'Repeat the note sequence')}</label>
-    <p className="studio-help">{settings.timing === 'timeline' ? t('Başlangıçlar şarkının başından ölçülür. Notalar otomatik tekrarlanmaz.', 'Start times are measured from the beginning of the song. Notes do not repeat automatically.') : t('Dizi, başlıktan sonraki seçili bölgede tekrarlanır.', 'The sequence repeats in the selected region after the header.')} {t('Çakışan, çok kısa veya frekans aralığı dışındaki notalar kapasiteye katılmaz.', 'Overlapping, very short or out-of-band notes do not contribute capacity.')}</p>
+    <p className="studio-help">{settings.timing === 'timeline' ? t('Başlangıçlar şarkının başından ölçülür. Notalar otomatik tekrarlanmaz.', 'Start times are measured from the beginning of the song. Notes do not repeat automatically.') : t('Dizi seçili aralıkta tekrarlanır.', 'The sequence repeats in the selected range.')}</p>
   </section>
 }

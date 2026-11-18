@@ -1,0 +1,38 @@
+.tool-home { max-width: 1080px; padding-top: 18px; }
+.tool-home .studio-page-heading { margin-bottom: 32px; }
+.tool-home .studio-page-heading h1 { font-size: 38px; letter-spacing: -1.5px; }
+.home-file { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 22px; padding: 24px; margin-bottom: 32px; background: #111e19; border: 1px solid var(--line); border-radius: 8px; }
+.home-file-info { display: flex; align-items: center; gap: 16px; min-width: 0; flex: 1 1 230px; }
+.home-file-info > svg { flex-shrink: 0; color: var(--signal); }
+.home-file-info > div { min-width: 0; }
+.home-file h2 { font-size: 15px; overflow-wrap: anywhere; }
+.home-file p { margin-top: 7px; font-size: 12px; line-height: 1.7; color: var(--muted); }
+.home-file .page-actions { flex-wrap: wrap; }
+.home-tools { border-top: 1px solid var(--line); }
+.home-tool { display: flex; gap: 22px; align-items: center; min-height: 132px; padding: 24px 18px; border-bottom: 1px solid var(--line); border-left: 2px solid transparent; transition: background .15s, border-color .15s; }
+.home-tool:hover { background: #14231b; border-left-color: var(--orange); }
+.home-tool-icon { display: grid; place-items: center; flex: 0 0 46px; height: 46px; color: var(--orange-soft); background: #ff854a09; border: 1px solid #ff854a24; border-radius: 8px; }
+.home-tool-copy { display: grid; gap: 9px; flex: 1; min-width: 0; }
+.home-tool-copy strong { font: 500 23px/1.3 var(--display); color: #f3f0e5; }
+.home-tool-copy > span { font-size: 12px; line-height: 1.7; color: var(--muted); }
+.home-tool-format { color: #94aa9a; font: 11px/1.6 var(--display); }
+.home-tool > svg { flex-shrink: 0; color: var(--orange); }
+.app-body { display: flex; flex-direction: column; min-height: 100vh; }
+.studio-main { width: 100%; flex: 1; }
+.app-sidebar .sidebar-bottom p { margin-bottom: 0; }
+.app-sidebar .sidebar-help { margin-top: 34px; }
+.guide-steps { margin: 18px 0; padding-left: 20px; color: #b6c8bb; font-size: 13px; line-height: 1.9; }
+.guide-steps li { padding-left: 5px; margin-bottom: 9px; }
+.receiver-flow .decode-inspector { grid-template-columns: minmax(0, 1fr); }
+@media (max-width: 650px) {
+  .tool-home { padding-top: 0; }
+  .tool-home .studio-page-heading h1 { font-size: 32px; }
+  .home-file { padding: 20px 16px; margin-bottom: 20px; }
+  .home-file .page-actions { width: 100%; }
+  .home-file .page-actions button { flex: 1; }
+  .home-tool { gap: 13px; min-height: 125px; padding: 20px 6px; }
+  .home-tool-icon { flex-basis: 36px; height: 40px; }
+  .home-tool-copy strong { font-size: 20px; }
+  .home-tool-copy > span { font-size: 11px; }
+  .home-tool-format { display: none; }
+}

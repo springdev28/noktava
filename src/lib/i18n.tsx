@@ -17,7 +17,6 @@ const patterns: [RegExp, string][] = [
   [/^(\d+)\. nota süresi$/, 'Note $1 duration'],
   [/^(\d+)\. notayı sil$/, 'Remove note $1'],
   [/^(\d+) işlem önce$/, '$1 actions ago'],
-  [/^(\d+) bayt mesaj NKTV v2 ile şifrelendi$/, '$1 message bytes encrypted with NKTV v2'],
   [/^(.+) içe aktarıldı$/, '$1 imported'],
   [/^Bu sesin kapasitesi (\d+) bayt; mesajın (\d+) bayt\. Daha uzun bir ses seç veya mesajını kısalt\.$/, 'This audio holds $1 bytes; your message uses $2. Choose longer audio or shorten the message.'],
 ]
@@ -46,8 +45,8 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     document.documentElement.lang = language
     document.querySelector('meta[name="description"]')?.setAttribute('content', t(
-      'Sese başka bir anlam kat. Noktava ile sesini düzenle, kısa mesajını şifrele ve bir WAV dosyasında paylaş.',
-      'Give sound a second meaning. Edit audio, encrypt a short message, and share it inside a WAV file with Noktava.',
+      'Noktava: ses düzenleme, mesaj şifreleme ve mesaj çözme araçları.',
+      'Noktava: tools for editing audio, encrypting messages and decoding messages.',
     ))
   }, [language, t])
   const value = useMemo(() => ({ language, setLanguage, t }), [language, setLanguage, t])
