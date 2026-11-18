@@ -40,10 +40,10 @@ Each page has its own URL. Internal navigation and browser back/forward preserve
 
 ## Audio studio
 
-- Waveforms drawn from actual PCM samples, with up to 64x zoom, timeline panning, drag selection and numeric region inputs.
+- Cached peak/RMS overview and a separate detail waveform with labeled time/amplitude axes, cursor-anchored zoom down to individual samples, draggable selection edges and numeric region inputs. Files open with no active selection.
 - A computed spectrogram using a 1024-point Hann-windowed FFT, with a 0–12 kHz frequency axis.
 - Playback, seeking, selection playback, selection looping, playback speed and listening volume. Playback settings do not alter exported samples.
-- Trim to selection, copy, cut, paste at cursor, duplicate, silence, reverse, linear fades, dB gain and normalization to -1 dBFS. Gain that would clip is rejected.
+- Direct sample drawing with automatic close zoom, plus trim to selection, copy, cut, paste at cursor, duplicate, silence, reverse, linear fades, dB gain and normalization to -1 dBFS. Gain that would clip is rejected.
 - Undo, redo, restore original, original waveform overlay and WAV export. The bounded history retains up to eight buffers within an approximate 64 MiB history budget, with at least one undo buffer for large files.
 - MIDI import with track selection, tempo-map timing, note and octave preview, editable start times and durations, and optional repetition. No automatic audio-to-MIDI transcription.
 
@@ -78,7 +78,7 @@ No server, account, analytics or third-party font requests are used. Keys and se
 
 ## Validation
 
-41 automated tests cover WAV round trips, wrong-key rejection, authenticated-header tampering, region bounds, PCM editing, FFT calibration, silent input, advanced settings, legacy v1 decoding, manual offset recovery key-format validation, MIDI tempo maps, track selection, timed-note round trips, overlapping notes, note-metadata tampering and clipboard edits. Browser checks cover selection, trimming, undo/redo, spectrogram rendering, cross-page state, advanced encoding, decoding, mobile navigation and responsive layouts.
+47 automated tests cover WAV round trips, wrong-key rejection, authenticated-header tampering, region bounds, PCM editing, FFT calibration, silent input, advanced settings, legacy v1 decoding, manual offset recovery key-format validation, MIDI tempo maps, track selection, timed-note round trips, overlapping notes, note-metadata tampering clipboard edits, waveform extrema/RMS, viewport precision and sample drawing. Browser checks include drawing changing exported PCM, byte-identical undo/redo, view preservation, both languages at 320 to 1440 pixels, selection handles, trimming, undo/redo, spectrogram rendering, cross-page state, advanced encoding, decoding, mobile navigation and responsive layouts.
 
 ## Implementation
 

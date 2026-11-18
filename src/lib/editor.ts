@@ -1,8 +1,8 @@
 import { AudioError, SAMPLE_RATE, readWav, resample, writeWav } from './audio'
 
 export type Selection = { start: number; end: number }
-export type EditKind = 'trim' | 'cut' | 'silence' | 'reverse' | 'fade-in' | 'fade-out' | 'gain' | 'normalize' | 'paste' | 'duplicate'
-export type EditCommand = Selection & { kind: EditKind; gainDb?: number; clipboard?: Float32Array }
+export type EditKind = 'trim' | 'cut' | 'silence' | 'reverse' | 'fade-in' | 'fade-out' | 'gain' | 'normalize' | 'paste' | 'duplicate' | 'draw'
+export type EditCommand = Selection & { kind: EditKind; gainDb?: number; clipboard?: Float32Array; drawnSamples?: Float32Array }
 export type AudioStats = { peak: number; rms: number; clippedSamples: number }
 export type EditorAudio = { samples: Float32Array; wav: ArrayBuffer; stats: AudioStats; sourceRate: number }
 export type Spectrogram = { values: Float32Array; columns: number; bins: number; maxHz: number }
@@ -39,6 +39,11 @@ export function editSamples(input: Float32Array, command: EditCommand): Float32A
     return output
   }
   if (end <= start) throw new AudioError('Seçim en az bir örnek içermeli.')
+  if (command.kind === 'draw') {
+    const values = command.drawnSamples
+    if (!values || values.length !== end - start || values.length > 16384 || values.some(n => !Number.isFinite(n) || Math.abs(n) > 1)) throw new AudioError('Çizilen örnekler geçersiz.')
+    const output = input.slice(); output.set(values, start); return output
+  }
   if (command.kind === 'trim') return input.slice(start, end)
   if (command.kind === 'cut') {
     if (end - start === input.length) throw new AudioError('Tüm sesi kesmek yerine daha küçük bir bölge seç.')

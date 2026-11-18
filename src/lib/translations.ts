@@ -333,3 +333,7 @@ Object.assign(english, {
   'WAV dosyası 60 MB sınırını aşıyor.': 'The WAV exceeds the 60 MB limit.',
   'Nota dizisi çok yoğun. Tekrarı kapat veya daha az nota kullan.': 'The note sequence is too dense. Turn repetition off or use fewer notes.',
 })
+Object.assign(english, {
+  'Ses örnekleri çizildi': 'Audio samples redrawn',
+  'Çizilen örnekler geçersiz.': 'Invalid drawn samples.',
+})

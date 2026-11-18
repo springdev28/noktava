@@ -8,7 +8,7 @@ import type { MidiScore } from '../lib/midi'
 export type Asset = { id: number; name: string; samples: Float32Array; blob: Blob; stats: AudioStats; sourceRate: number }
 export type EncodedResult = { blob: Blob; key: string; name: string; bytes: number; sourceId: number; settingsSignature: string; preview: Asset }
 const defaults: Settings = { notes: parseNotes(DEFAULT_NOTES), bpm: 120, startSeconds: 0, step: .1, harmonic: 4, pattern: 'adaptive' }
-const editNames = { paste: 'Ses yapıştırıldı', duplicate: 'Seçim çoğaltıldı', trim: 'Seçime kırpıldı', cut: 'Seçim kesildi', silence: 'Seçim susturuldu', reverse: 'Seçim ters çevrildi', 'fade-in': 'Yavaş giriş uygulandı', 'fade-out': 'Yavaş çıkış uygulandı', gain: 'Kazanç değiştirildi', normalize: '−1 dB tepeye normalize edildi' }
+const editNames = { draw: 'Ses örnekleri çizildi', paste: 'Ses yapıştırıldı', duplicate: 'Seçim çoğaltıldı', trim: 'Seçime kırpıldı', cut: 'Seçim kesildi', silence: 'Seçim susturuldu', reverse: 'Seçim ters çevrildi', 'fade-in': 'Yavaş giriş uygulandı', 'fade-out': 'Yavaş çıkış uygulandı', gain: 'Kazanç değiştirildi', normalize: '−1 dB tepeye normalize edildi' }
 let assetId = 0
 const makeAsset = (data: EditorAudio, name: string): Asset => ({ id: ++assetId, name, samples: data.samples, blob: new Blob([data.wav], { type: 'audio/wav' }), stats: data.stats, sourceRate: data.sourceRate })
 
@@ -30,7 +30,7 @@ function useStudioState() {
   const addLog = (entry: string) => setLog(list => [entry, ...list].slice(0, 12))
   const replace = useCallback((next: Asset) => {
     setAsset(next); setOriginal(next); setPast([]); setFuture([])
-    setSelection({ start: 0, end: next.samples.length / SAMPLE_RATE })
+    setSelection({ start: 0, end: 0 })
     setSettings(s => ({ ...s, startSeconds: 0, endSeconds: undefined })); setEncoded(null)
   }, [])
   const load = useCallback(async (file?: File) => {
@@ -55,7 +55,11 @@ function useStudioState() {
       setPast(list => [...list, asset].slice(-limit)); setFuture([])
       const next = makeAsset({ ...result, sourceRate: asset.sourceRate }, asset.name); setAsset(next); setEncoded(null)
       if (['cut', 'trim', 'paste', 'duplicate'].includes(command.kind)) {
-        setSelection({ start: 0, end: next.samples.length / SAMPLE_RATE })
+        const inserted = (next.samples.length - asset.samples.length) / SAMPLE_RATE
+        if (command.kind === 'cut') setSelection({ start: Math.min(command.start, next.samples.length / SAMPLE_RATE), end: Math.min(command.start, next.samples.length / SAMPLE_RATE) })
+        else if (command.kind === 'paste') setSelection({ start: command.start, end: command.start + inserted })
+        else if (command.kind === 'duplicate') setSelection({ start: command.end, end: command.end + inserted })
+        else setSelection({ start: 0, end: next.samples.length / SAMPLE_RATE })
         setSettings(s => ({ ...s, startSeconds: 0, endSeconds: undefined }))
       }
       addLog(editNames[command.kind])
@@ -63,7 +67,7 @@ function useStudioState() {
     finally { setBusy(''); busyRef.current = false }
   }
   function restore(next: Asset) {
-    setAsset(next); setEncoded(null); setError(''); setSelection({ start: 0, end: next.samples.length / SAMPLE_RATE })
+    setAsset(next); setEncoded(null); setError(''); setSelection(s => ({ start: Math.min(s.start, next.samples.length / SAMPLE_RATE), end: Math.min(s.end, next.samples.length / SAMPLE_RATE) }))
     setSettings(s => ({ ...s, startSeconds: 0, endSeconds: undefined }))
   }
   function undo() {
