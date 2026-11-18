@@ -1,5 +1,5 @@
 /// <reference lib="webworker" />
-import { encryptAudio, decryptAudio, inspectWav, inspectCarrier, makeDemo, readWav, type DecodeOptions, type Settings } from '../lib/audio'
+import { encryptAudio, decodeCarrier, inspectWav, inspectCarrier, makeDemo, readWav, type DecodeOptions, type Settings } from '../lib/audio'
 import { audioStats, editSamples, loadEditorAudio, packAudio, spectrogram, type EditCommand } from '../lib/editor'
 
 type Request = { id: number; operation: string; buffer: ArrayBuffer; message: string; settings: Settings; key: string; samples: Float32Array; command: EditCommand; start: number; end: number; maxHz: number; options: DecodeOptions }
@@ -21,7 +21,7 @@ self.onmessage = async (event: MessageEvent<Request>) => {
       const result = await encryptAudio(buffer, message, settings)
       const samples = readWav(result.wav).samples
       self.postMessage({ id, result: { ...result, samples, stats: audioStats(samples) } }, [result.wav, samples.buffer])
-    } else if (operation === 'decrypt') self.postMessage({ id, result: await decryptAudio(buffer, key, event.data.options) })
+    } else if (operation === 'decrypt') self.postMessage({ id, result: await decodeCarrier(buffer, key, event.data.options) })
     else throw new Error('Bilinmeyen işlem.')
   } catch (error) {
     self.postMessage({ id, error: error instanceof Error ? error.message : 'İşlem tamamlanamadı. Lütfen yeniden dene.' })

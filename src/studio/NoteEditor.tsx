@@ -8,10 +8,10 @@ const names = { tr: ['Do', 'Do♯', 'Re', 'Re♯', 'Mi', 'Fa', 'Fa♯', 'Sol', '
 export const noteName = (midi: number, language: 'tr' | 'en' = 'tr') => `${names[language][midi % 12]}${Math.floor(midi / 12) - 1}`
 export function NoteEditor({ disabled = false }: { disabled?: boolean }) {
   const { t, language } = useI18n()
-  const { settings, setSettings, busy, midiScore, setMidiScore, midiTrack, setMidiTrack } = useStudio()
+  const { settings, setSettings, busy, midiScore, setMidiScore, midiTrack, setMidiTrack, midiHelpSeen, setMidiHelpSeen } = useStudio()
   const [mode, setMode] = useState<'manual' | 'midi'>(midiScore ? 'midi' : 'manual')
   const [error, setError] = useState(''), [loading, setLoading] = useState(false), [page, setPage] = useState(0)
-  const [help, setHelp] = useState(false)
+  const [help, setHelp] = useState(!midiHelpSeen)
   const input = useRef<HTMLInputElement>(null)
   const locked = disabled || !!busy || loading
   let cursor = 0
@@ -31,11 +31,11 @@ export function NoteEditor({ disabled = false }: { disabled?: boolean }) {
     catch (e) { setError((e as Error).message) }
     finally { setLoading(false) }
   }
-  function closeHelp() { setHelp(false) }
+  function closeHelp() { setHelp(false); setMidiHelpSeen(true) }
   return <section className="studio-card note-editor">
-    <div className="card-heading"><h2><Music2 size={16} />{t('Notalar', 'Notes')}</h2><button type="button" className="text-button" onClick={() => setHelp(!help)}><HelpCircle size={14} />{t('Nota girişi yardımı', 'Note input help')}</button></div>
-    {help && <div className="midi-help"><button type="button" className="studio-icon-button" aria-label={t('Yardımı kapat', 'Close help')} onClick={closeHelp}><X size={16} /></button><ol>
-
+    <div className="card-heading"><h2><Music2 size={16} />{t('Notalar', 'Notes')}</h2><button type="button" className="text-button" aria-expanded={help} aria-controls="midi-help" onClick={() => help ? closeHelp() : setHelp(true)}><HelpCircle size={14} />{t('MIDI nedir?', 'What is MIDI?')}</button></div>
+    {help && <div className="midi-help" id="midi-help"><button type="button" className="studio-icon-button" aria-label={t('Yardımı kapat', 'Close help')} onClick={closeHelp}><X size={16} /></button><ol>
+      <li><strong>{t('MIDI bir ses kaydı değildir.', 'MIDI is not an audio recording.')}</strong><span>{t('Nota, oktav, başlangıç ve süre bilgilerini içerir. MP3 veya WAV dosyan şarkının kendisidir.', 'It contains notes, octaves, start times and durations. Your MP3 or WAV contains the song itself.')}</span></li>
       <li><strong>{t('MIDI yükle veya elle gir.', 'Import MIDI or enter notes.')}</strong><span>{t('Şarkının ilgili bölümüne ait .mid dosyasını kullan. MIDI yoksa notaları aşağıda düzenle.', 'Use a .mid file for the relevant part of your song, or enter the notes below.')}</span></li>
       <li><strong>{t('Önizlemeyi kontrol et.', 'Check the preview.')}</strong><span>{t('Notaları kontrol edip şifrele. Alıcının MIDI dosyasına ihtiyacı yok.', 'Check the notes, then encrypt. The recipient does not need the MIDI file.')}</span></li>
     </ol></div>}

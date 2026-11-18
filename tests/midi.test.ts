@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { Midi } from '@tonejs/midi'
 import { readMidi } from '../src/lib/midi'
-import { capacity, decryptAudio, encryptAudio, inspectCarrier, SAMPLE_RATE, writeWav, type Settings } from '../src/lib/audio'
+import { capacity, decodeCarrier, decryptAudio, encryptAudio, inspectCarrier, SAMPLE_RATE, writeWav, type Settings } from '../src/lib/audio'
 import { editSamples } from '../src/lib/editor'
 
 function score() {
@@ -44,27 +44,28 @@ describe('MIDI import and authenticated note timing', () => {
     expect(capacity(120 * SAMPLE_RATE, settings)).toBeGreaterThan(new TextEncoder().encode(message).length)
     const result = await encryptAudio(wav(), message, settings)
     expect(await decryptAudio(result.wav, result.key)).toBe(message)
-    const info = inspectCarrier(result.wav)
-    expect(info.version).toBe(3); expect(info.notes).toHaveLength(320)
+    const info = (await decodeCarrier(result.wav, result.key)).info
+    expect(info.version).toBe(4); expect(info.notes).toHaveLength(320)
     expect(info.notes[40].startSeconds).toBeCloseTo(settings.notes[40].startSeconds!, 4)
     expect(info.notes[40].durationSeconds).toBeCloseTo(settings.notes[40].durationSeconds!, 4)
     await expect(decryptAudio(result.wav, '00'.repeat(32))).rejects.toThrow('doğrulanamadı')
   })
-  it('authenticates metadata even when a change cannot affect embedded bits', async () => {
+  it('keeps note details locked and does not append a readable timing chunk', async () => {
     const result = await encryptAudio(wav(), 'M', getSettings())
-    const altered = result.wav.slice(0), view = new DataView(altered)
-    const metadata = 44 + 120 * SAMPLE_RATE * 2 + 8
-    // First note is before the bootstrap header, but is still authenticated.
-    view.setFloat32(metadata + 8 + 9, .8, true)
-    await expect(decryptAudio(altered, result.key)).rejects.toThrow('doğrulanamadı')
-    const stripped = result.wav.slice(0, metadata - 8); new DataView(stripped).setUint32(4, stripped.byteLength - 8, true)
-    await expect(decryptAudio(stripped, result.key)).rejects.toThrow('Nota zaman başlığı')
+    const info = inspectCarrier(result.wav)
+    expect(info).toMatchObject({ version: 4, locked: true, controlEncrypted: true, authenticated: false })
+    expect(info).not.toHaveProperty('notes')
+    expect(info).not.toHaveProperty('ciphertextBytes')
+    expect(result.wav.byteLength).toBe(44 + 120 * SAMPLE_RATE * 2)
   })
   it('handles overlapping notes without overwriting the same audio blocks', async () => {
     const settings = getSettings()
+    settings.notes = settings.notes.slice(0, 12)
+    settings.timing = 'loop'
     settings.notes = settings.notes.flatMap(n => [n, { ...n, midi: n.midi + 7 }])
     const max = capacity(120 * SAMPLE_RATE, settings)
-    expect(max).toBe(capacity(120 * SAMPLE_RATE, getSettings()))
+    expect(max).toBeGreaterThan(0)
+    expect(max).toBeLessThanOrEqual(capacity(120 * SAMPLE_RATE, { ...settings, notes: settings.notes.filter((_, i) => i % 2 === 0) }))
     const result = await encryptAudio(wav(), 'x'.repeat(max), settings)
     expect(await decryptAudio(result.wav, result.key)).toBe('x'.repeat(max))
   })

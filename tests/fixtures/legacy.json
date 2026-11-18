@@ -1,0 +1,20 @@
+[
+  {
+    "version": 1,
+    "filename": "legacy-v1.wav.gz",
+    "key": "49f2d0ec47589c1db65a1692c7c0c58b9e06fc43764bd4316e42e28571e1f5db",
+    "message": "Legacy v1"
+  },
+  {
+    "version": 2,
+    "filename": "legacy-v2.wav.gz",
+    "key": "e10ff6d1aafecedf09f7ada62088c4ece32eea60219a7cea518e6032882b90c8",
+    "message": "Legacy v2"
+  },
+  {
+    "version": 3,
+    "filename": "legacy-v3.wav.gz",
+    "key": "bd4db1d5c587ac8e078373c2a5d55da53693b38efa4897c86c47d2e35266463b",
+    "message": "Legacy v3"
+  }
+]

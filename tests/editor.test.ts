@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest'
+import { legacyFixture } from './fixtures/legacy'
 import { audioStats, editSamples, keyToHex, spectrum, spectrogram } from '../src/lib/editor'
-import { SAMPLE_RATE, capacity, decryptAudio, encryptAudio, headerSize, inspectCarrier, parseNotes, readWav, writeWav } from '../src/lib/audio'
+import { SAMPLE_RATE, capacity, decodeCarrier, decryptAudio, encryptAudio, headerSize, inspectCarrier, parseNotes, readWav, writeWav } from '../src/lib/audio'
 
 const base = { notes: parseNotes('60:1, 62:1, 65:1, 64:1'), bpm: 180, startSeconds: 0 }
-const v2 = { ...base, step: .07, harmonic: 3, pattern: 'adaptive' as const, endSeconds: 28 }
+const advanced = { ...base, step: .07, harmonic: 3, pattern: 'adaptive' as const, endSeconds: 28 }
 const source = writeWav(new Float32Array(SAMPLE_RATE * 30))
 
 describe('manual audio edits', () => {
@@ -60,29 +61,29 @@ describe('frequency inspection', () => {
   })
 })
 
-describe('NKTV v2 settings and decoder controls', () => {
+describe('encrypted settings and decoder controls', () => {
   it('authenticates advanced settings and round-trips non-default parameters', async () => {
-    const result = await encryptAudio(source, 'Yeni 🔑', v2)
-    const info = inspectCarrier(result.wav)
-    expect(info).toMatchObject({ version: 2, step: .07, harmonic: 3, pattern: 'adaptive', bpm: 180, endSeconds: 28, authenticated: false })
+    const result = await encryptAudio(source, 'Yeni 🔑', advanced)
+    const info = (await decodeCarrier(result.wav, result.key)).info
+    expect(info).toMatchObject({ version: 4, step: .07, harmonic: 3, pattern: 'adaptive', bpm: 180, endSeconds: 28, authenticated: true })
     expect(info.meanDecisionMargin).toBeGreaterThan(.45)
     expect(await decryptAudio(result.wav, result.key)).toBe('Yeni 🔑')
   })
   it.each([.02, .2])('round-trips the supported strength boundary %s', async step => {
-    const result = await encryptAudio(source, 'M', { ...v2, step, harmonic: 6, pattern: 'fixed' })
-    expect(inspectCarrier(result.wav)).toMatchObject({ step, harmonic: 6, pattern: 'fixed' })
+    const result = await encryptAudio(source, 'M', { ...advanced, step, harmonic: 6, pattern: 'fixed' })
+    expect((await decodeCarrier(result.wav, result.key)).info).toMatchObject({ step, harmonic: 6, pattern: 'fixed' })
     expect(await decryptAudio(result.wav, result.key)).toBe('M')
   })
   it('keeps payload samples after the selected end unchanged', async () => {
-    const settings = { ...v2, endSeconds: 25 }
+    const settings = { ...advanced, endSeconds: 25 }
     const result = await encryptAudio(source, 'M', settings)
     const samples = readWav(result.wav).samples
     expect(samples.subarray(25 * SAMPLE_RATE).every(n => n === 0)).toBe(true)
     expect(capacity(samples.length, settings)).toBeLessThan(capacity(samples.length, { ...settings, endSeconds: 30 }))
-    expect(headerSize(v2)).toBe(44)
+    expect(headerSize(advanced)).toBe(76)
   })
   it('supports exact manual alignment after an unmodified carrier is prefixed', async () => {
-    const result = await encryptAudio(source, 'Hizala', v2)
+    const result = await encryptAudio(source, 'Hizala', advanced)
     const { samples } = readWav(result.wav)
     const shift = 1537
     const prefixed = new Float32Array(samples.length + shift)
@@ -94,17 +95,17 @@ describe('NKTV v2 settings and decoder controls', () => {
     await expect(decryptAudio(wav, '0'.repeat(64), { headerOffsetSamples: shift })).rejects.toThrow('doğrulanamadı')
   })
   it('continues to read NKTV v1 files', async () => {
-    const result = await encryptAudio(source, 'v1', base)
+    const result = legacyFixture(1)
     expect(inspectCarrier(result.wav).version).toBe(1)
-    expect(await decryptAudio(result.wav, result.key)).toBe('v1')
+    expect(await decryptAudio(result.wav, result.key)).toBe(result.message)
   })
   it('normalizes arbitrary strength precision to the authenticated header', async () => {
-    const result = await encryptAudio(source, 'M', { ...v2, step: .073827 })
-    expect(inspectCarrier(result.wav).step).toBe(.0738)
+    const result = await encryptAudio(source, 'M', { ...advanced, step: .073827 })
+    expect((await decodeCarrier(result.wav, result.key)).info.step).toBe(.0738)
     expect(await decryptAudio(result.wav, result.key)).toBe('M')
   })
   it('rejects invalid advanced parameters and header offsets', async () => {
-    for (const patch of [{ step: 0 }, { harmonic: 9 }, { endSeconds: -1 }]) await expect(encryptAudio(source, 'M', { ...v2, ...patch })).rejects.toThrow()
+    for (const patch of [{ step: 0 }, { harmonic: 9 }, { endSeconds: -1 }]) await expect(encryptAudio(source, 'M', { ...advanced, ...patch })).rejects.toThrow()
     expect(() => inspectCarrier(source, { headerOffsetSamples: -1 })).toThrow()
     expect(() => inspectCarrier(source, { headerOffsetSamples: .5 })).toThrow()
   })

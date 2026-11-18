@@ -21,6 +21,7 @@ function useStudioState() {
   const [settings, setSettings] = useState<Settings>(defaults)
   const [midiScore, setMidiScore] = useState<MidiScore | null>(null)
   const [midiTrack, setMidiTrack] = useState(0)
+  const [midiHelpSeen, setMidiHelpSeen] = useState(false)
   const [busy, setBusy] = useState(''), [error, setError] = useState('')
   const [log, setLog] = useState<string[]>([])
   const [message, setMessage] = useState('')
@@ -88,7 +89,7 @@ function useStudioState() {
     addLog('Seçim kopyalandı')
   }
   return { clipboard, copy, asset, original, selection, setSelection, settings, setSettings, busy, error, setError, load, edit, undo, redo, reset,
-    canUndo: past.length > 0, canRedo: future.length > 0, log, addLog, message, setMessage, encoded, setEncoded, decoder, setDecoder, midiScore, setMidiScore, midiTrack, setMidiTrack }
+    canUndo: past.length > 0, canRedo: future.length > 0, log, addLog, message, setMessage, encoded, setEncoded, decoder, setDecoder, midiScore, setMidiScore, midiTrack, setMidiTrack, midiHelpSeen, setMidiHelpSeen }
 }
 const StudioContext = createContext<ReturnType<typeof useStudioState> | null>(null)
 export function StudioProvider({ children }: { children: ReactNode }) {

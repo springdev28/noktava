@@ -55,32 +55,32 @@ The studio uses mono 48 kHz working audio and exports 16-bit PCM WAV. Stereo is 
 
 The default sender flow is upload MP3/WAV, write a message, choose notes or import MIDI, encrypt, then download the WAV and copy the generated key. Technical controls are collapsed under Advanced options. The separate sound studio is optional.
 
-- AES-256-GCM using browser Web Crypto, fresh random 256-bit key, 96-bit IV and 128-bit tag.
+- AES-256-GCM using browser Web Crypto, a fresh random 256-bit key, distinct 96-bit IVs and 128-bit tags for control and message packets.
 - Note-adaptive or fixed quadratic patterns; selectable QIM strength from 0.02 to 0.20 and harmonic bands 2–6.
 - A bounded embedding region, UTF-8 byte capacity, waveform comparison and encrypted WAV export.
 - Hex key display, copying and direct transfer to the decoder for verification.
 
-The public header is authenticated as GCM additional data. Timed notes and MIDI use NKTV v3 with authenticated note timing in a RIFF chunk. The existing repeating pattern uses v2. V1, v2 and v3 remain readable. See [protocol details](docs/protocol.md).
+New exports use NKTV v4. Notes, exact timing, message length and decoding settings are encrypted and authenticated inside the audio samples. The WAV contains only standard audio chunks, with no readable note metadata. The receiver decrypts the control packet before extracting and verifying the message. V1, v2 and v3 remain readable. See [protocol details](docs/protocol.md).
 
 ## Decoding
 
 - Separate encrypted WAV input and Hex/Base64 key input.
-- Keyless structural header inspection with explicit unverified status until GCM succeeds.
-- Public note, tempo, strength and harmonic metadata, with optional raw header/ciphertext hex inspection.
+- Keyless v4 inspection shows locked file details. Notes, tempo, strength, harmonic and message size are available only after authentication.
+- Legacy public metadata remains inspectable with explicit unverified status. Optional raw data inspection remains under Advanced.
 - Manual header offset in samples for carriers with an added prefix. This cannot reconstruct deleted or re-encoded data and never bypasses authentication.
 - Verified plaintext display, clipboard copy and TXT export.
 
 ## Limits
 
-This is an experimental research implementation, not an audited messaging product. Audio changes can be audible; compression, trimming, normalization and other edits can destroy the embedded message. Whole-recording integrity is not authenticated: GCM covers the header and message, not every audio sample. QIM decision margin is a signal diagnostic, not proof of authenticity.
+This is an experimental research implementation, not an audited messaging product. Audio changes can be audible; compression, trimming, normalization and other edits can destroy the embedded message. Whole-recording integrity is not authenticated: GCM covers the bootstrap, control packet and message, not every audio sample. QIM decision margin is a signal diagnostic, not proof of authenticity.
 
-Only two bits are embedded per note, so message capacity is intentionally small. It depends on duration, tempo, note lengths, the selected interval and header overhead. The UI calculates the available UTF-8 bytes.
+Only two bits are embedded per note, so message capacity is intentionally small. It depends on duration, tempo, note lengths, the selected interval and encrypted-control overhead. Large MIDI scores may leave no message capacity in a short recording. The UI calculates the available UTF-8 bytes.
 
 No server, account, analytics or third-party font requests are used. Keys and sessions are not saved. Export the WAV and store the key separately before leaving the browser.
 
 ## Validation
 
-47 automated tests cover WAV round trips, wrong-key rejection, authenticated-header tampering, region bounds, PCM editing, FFT calibration, silent input, advanced settings, legacy v1 decoding, manual offset recovery key-format validation, MIDI tempo maps, track selection, timed-note round trips, overlapping notes, note-metadata tampering clipboard edits, waveform extrema/RMS, viewport precision and sample drawing. Browser checks include drawing changing exported PCM, byte-identical undo/redo, view preservation, both languages at 320 to 1440 pixels, selection handles, trimming, undo/redo, spectrogram rendering, cross-page state, advanced encoding, decoding, mobile navigation and responsive layouts.
+62 automated tests cover WAV round trips, wrong-key rejection, authenticated-header tampering, region bounds, PCM editing, FFT calibration, silent input, advanced settings, saved pre-update v1/v2/v3 decoding, manual offset recovery key-format validation, MIDI tempo maps, track selection, timed-note round trips, overlapping notes, encrypted control and legacy note-metadata tampering, clipboard edits, waveform extrema/RMS, viewport precision and sample drawing. A separate Node/OpenSSL reference decoder verifies v4 control and message recovery directly from PCM. Additional checks cover distinct IVs, control verification before message extraction, locked diagnostics, metadata-free WAV output, lossless PCM repackaging and encrypted-control capacity limits. Browser checks include drawing changing exported PCM, byte-identical undo/redo, view preservation, both languages at 320 to 1440 pixels, selection handles, trimming, undo/redo, spectrogram rendering, cross-page state, advanced encoding, decoding, mobile navigation and responsive layouts.
 
 ## Implementation
 
