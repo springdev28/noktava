@@ -5,29 +5,18 @@ import { Link } from '../lib/router'
 export function GuidePage() {
   const { t } = useI18n()
   return <>
-    <div className="studio-page-heading"><div><h1>{t('Kullanım kılavuzu')}</h1><p>{t('Dosya açma, düzenleme ve kaydetme.', 'Opening, editing and saving files.')}</p></div><BookOpen size={28} strokeWidth={1.5} /></div>
+    <div className="studio-page-heading"><div><h1>{t('Kullanım kılavuzu')}</h1><p>{t('Mesaj şifreleme ve gelen mesajı açma.', 'Encrypting a message and opening a received message.')}</p></div><BookOpen size={28} strokeWidth={1.5} /></div>
     <div className="guide-grid">
       <nav className="studio-card guide-toc" aria-label={t('Kılavuz bölümleri')}>
-        <a href="#guide-editor">{t('Ses stüdyosu')}</a><a href="#guide-encoding">{t('Mesaj şifrele')}</a><a href="#guide-decoding">{t('Mesaj çöz')}</a><a href="#guide-files">{t('Dosyalar', 'Files')}</a><a href="#guide-shortcuts">{t('Klavye kısayolları', 'Keyboard shortcuts')}</a>
+        <a href="#guide-encoding">{t('Mesaj şifrele')}</a><a href="#guide-decoding">{t('Mesaj çöz')}</a><a href="#guide-files">{t('Dosyalar', 'Files')}</a><a href="#guide-editor">{t('Ses stüdyosu')} <small>({t('İsteğe bağlı', 'Optional')})</small></a><a href="#guide-shortcuts">{t('Klavye kısayolları', 'Keyboard shortcuts')}</a>
       </nav>
       <div className="guide-content">
-        <section className="studio-card" id="guide-editor"><AudioLines size={23} /><h2>{t('Ses stüdyosu')}</h2>
-          <ol className="guide-steps">
-            <li>{t('Ses dosyası aç düğmesiyle bir MP3 veya WAV seç.', 'Choose an MP3 or WAV with Open audio.')}</li>
-            <li>{t('Üstteki küçük dalgada gezin. 10 s, 1 s ve 10 ms düğmeleriyle yakınlaş.', 'Move through the recording in the small overview. Use 10 s, 1 s and 10 ms to zoom.')}</li>
-            <li>{t('Büyük dalgada sürükleyerek bir bölge seç. Turuncu tutamaçlarla başlangıcı ve bitişi ayarla.', 'Drag across the main waveform to select a region. Move the orange handles to adjust its start and end.')}</li>
-            <li>{t('Kes, kopyala veya kırp. Örnekleri çiz ile dalgayı elle değiştirebilirsin. Geri al, son düzenlemeyi geri getirir.', 'Cut, copy or trim. Use Draw samples to edit the waveform by hand. Undo restores the previous edit.')}</li>
-            <li>{t('Bitirdiğinde WAV dışa aktar düğmesiyle dosyanı kaydet.', 'When finished, save your file with Export WAV.')}</li>
-          </ol>
-          <p>{t('Dalga formunda yatay eksen zaman, dikey eksen ses seviyesidir. Spektrogramdaki parlak alanlar daha güçlü frekansları gösterir. Dikey ölçek, oynatma hızı ve dinleme ses seviyesi yalnızca önizlemeyi etkiler.', 'In the waveform, time runs horizontally and audio level vertically. Brighter areas in the spectrogram show stronger frequencies. Vertical scale, playback speed and listening volume affect only the preview.')}</p>
-          <Link href="/studio" className="text-link">{t('Ses stüdyosunu aç')}<ArrowRight size={14} /></Link>
-        </section>
         <section className="studio-card" id="guide-encoding"><LockKeyhole size={23} /><h2>{t('Mesaj şifrele')}</h2>
           <ol className="guide-steps">
             <li>{t('MP3 veya WAV dosyanı aç.', 'Open your MP3 or WAV.')}</li>
             <li>{t('Mesajını yaz. Gösterilen uzunluk sınırını aşma.', 'Write your message within the displayed limit.')}</li>
             <li>{t('Bir MIDI dosyası yükle veya notaları elle gir. MIDI birden fazla iz içeriyorsa kullanacağın izi seç.', 'Import a MIDI file or enter the notes. If the MIDI has several tracks, choose the one to use.')}</li>
-            <li>{t('Şifrele düğmesine bas.', 'Press Encrypt.')}</li>
+            <li>{t('Şifrele düğmesine bas. Mesaj dosyaya otomatik olarak eklenir.', 'Press Encrypt. The message is added to the file automatically.')}</li>
             <li>{t('WAV dosyasını indir ve gizli anahtarı kaydet. Dosyayı alıcıya gönder; anahtarı ayrı ve güvenli bir kanaldan paylaş.', 'Download the WAV and save the secret key. Send the file to your recipient and share the key through a separate secure channel.')}</li>
           </ol>
           <p>{t('Notaların başlangıç ve sürelerini tabloda değiştirebilirsin. Sesi kestikten sonra bu zamanları tekrar kontrol et.', 'You can change note start times and durations in the table. Check those times again after cutting the audio.')}</p>
@@ -49,6 +38,17 @@ export function GuidePage() {
             <div><dt>MIDI</dt><dd>{t('.mid veya .midi, en fazla 1 MB.', '.mid or .midi, up to 1 MB.')}</dd></div>
           </dl>
           <p>{t('Sayfayı yenilemeden veya kapatmadan önce dosyanı ve anahtarını kaydet. Şifrelenmiş WAV dosyasını düzenlemeden ve MP3’e dönüştürmeden paylaş.', 'Save your file and key before reloading or closing the page. Share the encrypted WAV without editing it or converting it to MP3.')}</p>
+        </section>
+        <section className="studio-card" id="guide-editor"><AudioLines size={23} /><h2>{t('Ses stüdyosu')}</h2><p>{t('İsteğe bağlıdır. Mesaj şifrelemek için sesi elle düzenlemen gerekmez.', 'Optional. You do not need to edit the audio manually to encrypt a message.')}</p>
+          <ol className="guide-steps">
+            <li>{t('Ses dosyası aç düğmesiyle bir MP3 veya WAV seç.', 'Choose an MP3 or WAV with Open audio.')}</li>
+            <li>{t('Üstteki küçük dalgada gezin. 10 s, 1 s ve 10 ms düğmeleriyle yakınlaş.', 'Move through the recording in the small overview. Use 10 s, 1 s and 10 ms to zoom.')}</li>
+            <li>{t('Büyük dalgada sürükleyerek bir bölge seç. Turuncu tutamaçlarla başlangıcı ve bitişi ayarla.', 'Drag across the main waveform to select a region. Move the orange handles to adjust its start and end.')}</li>
+            <li>{t('Kes, kopyala veya kırp. Örnekleri çiz ile dalgayı elle değiştirebilirsin. Geri al, son düzenlemeyi geri getirir.', 'Cut, copy or trim. Use Draw samples to edit the waveform by hand. Undo restores the previous edit.')}</li>
+            <li>{t('Bitirdiğinde WAV dışa aktar düğmesiyle dosyanı kaydet.', 'When finished, save your file with Export WAV.')}</li>
+          </ol>
+          <p>{t('Dalga formunda yatay eksen zaman, dikey eksen ses seviyesidir. Spektrogramdaki parlak alanlar daha güçlü frekansları gösterir. Dikey ölçek, oynatma hızı ve dinleme ses seviyesi yalnızca önizlemeyi etkiler.', 'In the waveform, time runs horizontally and audio level vertically. Brighter areas in the spectrogram show stronger frequencies. Vertical scale, playback speed and listening volume affect only the preview.')}</p>
+          <Link href="/studio" className="text-link">{t('Ses stüdyosunu aç')}<ArrowRight size={14} /></Link>
         </section>
         <section className="studio-card" id="guide-shortcuts"><Command size={23} /><h2>{t('Klavye kısayolları', 'Keyboard shortcuts')}</h2>
           <dl className="shortcut-list">

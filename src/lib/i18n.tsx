@@ -45,8 +45,8 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     document.documentElement.lang = language
     document.querySelector('meta[name="description"]')?.setAttribute('content', t(
-      'Noktava: ses düzenleme, mesaj şifreleme ve mesaj çözme araçları.',
-      'Noktava: tools for editing audio, encrypting messages and decoding messages.',
+      'noktava. Ses dosyalarıyla mesaj şifreleme ve çözme.',
+      'noktava. Encrypt and open messages in audio files.',
     ))
   }, [language, t])
   const value = useMemo(() => ({ language, setLanguage, t }), [language, setLanguage, t])

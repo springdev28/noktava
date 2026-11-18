@@ -335,7 +335,7 @@ function readBit(samples: Float32Array, block: number, vector: Float64Array, ste
 function bitAt(bytes: Uint8Array, i: number) { return (bytes[i >> 3] >> (7 - (i % 8))) & 1 }
 
 function readHeaderBytes(samples: Float32Array, length: number) {
-  if (samples.length < length * 8 * BLOCK_SIZE) throw new AudioError('Bu ses dosyası Noktava başlığı için çok kısa.')
+  if (samples.length < length * 8 * BLOCK_SIZE) throw new AudioError('Bu ses dosyası noktava. başlığı için çok kısa.')
   const bytes = new Uint8Array(length)
   const vector = basis(256, 0, 0)
   for (let i = 0; i < length * 8; i++) bytes[i >> 3] |= readBit(samples, i, vector) << (7 - (i % 8))
@@ -389,12 +389,12 @@ export async function encryptAudio(buffer: ArrayBuffer, message: string, setting
 
 function readCarrier(buffer: ArrayBuffer, options: DecodeOptions = {}) {
   const audio = readWav(buffer)
-  if (audio.sampleRate !== SAMPLE_RATE) throw new AudioError('Noktava çıktısı 48 kHz olmalı. Yeniden örneklenmemiş özgün çıktıyı kullan.')
+  if (audio.sampleRate !== SAMPLE_RATE) throw new AudioError('noktava. çıktısı 48 kHz olmalı. Yeniden örneklenmemiş özgün çıktıyı kullan.')
   const offset = options.headerOffsetSamples ?? 0
   if (!Number.isInteger(offset) || offset < 0 || offset > SAMPLE_RATE * 60 || offset >= audio.samples.length) throw new AudioError('Başlık konumu 0–2.880.000 örnek arasında ve dosyanın içinde olmalı.')
   const samples = audio.samples.subarray(offset)
   const preliminary = readHeaderBytes(samples, BASE_HEADER)
-  if (!MAGIC.every((n, i) => preliminary[i] === n) || ![1, 2, 3].includes(preliminary[4])) throw new AudioError('Noktava mesajı bulunamadı. Dosya değiştirilmiş veya başlık konumu yanlış olabilir.')
+  if (!MAGIC.every((n, i) => preliminary[i] === n) || ![1, 2, 3].includes(preliminary[4])) throw new AudioError('noktava. mesajı bulunamadı. Dosya değiştirilmiş veya başlık konumu yanlış olabilir.')
   const noteCount = preliminary[5]
   const metadata = preliminary[4] === 3 ? getTimingChunk(buffer) : undefined
   if (metadata ? noteCount !== 0 : noteCount < 1 || noteCount > 16) throw new AudioError('Dosyanın nota başlığı bozulmuş.')

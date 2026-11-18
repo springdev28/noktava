@@ -1,8 +1,10 @@
-# Noktava brand and interface
+# noktava. brand and interface
 
 [Figma design file](https://www.figma.com/design/CLb4yxWNUk33Qe5yxZ93BQ)
 
 The file includes the editable logo, brand board, Turkish and English desktop layouts, and an English mobile layout. The orange mark was created with Figma's vector generation tool and exported as editable SVG. The wordmark uses Space Grotesk and stays on one line with a fixed gap from the mark.
+
+The brand name and wordmark are `noktava.`, including the trailing period. Message encryption and decoding are the primary actions; the sound studio is an optional advanced tool.
 
 ## Palette
 

@@ -47,7 +47,7 @@ describe('note-adaptive encrypted WAV carrier', () => {
     await expect(decryptAudio(writeWav(samples), encoded.key)).rejects.toThrow('Mesaj doğrulanamadı')
   })
   it('rejects an ordinary WAV and a malformed key', async () => {
-    await expect(decryptAudio(source, encoded.key)).rejects.toThrow('Noktava mesajı bulunamadı')
+    await expect(decryptAudio(source, encoded.key)).rejects.toThrow('noktava. mesajı bulunamadı')
     await expect(decryptAudio(encoded.wav, 'not-a-key')).rejects.toThrow('64')
   })
   it('matches the brief’s normalized Do quadratic pattern', () => {

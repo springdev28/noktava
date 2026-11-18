@@ -1,6 +1,6 @@
-# Noktava
+# noktava.
 
-An audio editor and encrypted-message application with Turkish and English interfaces. All audio processing, editing, encryption and decoding run locally in the browser. Visual styling follows the supplied [Dribbble reference](https://dribbble.com/shots/27899319-AI-Cybersecurity-website).
+An encrypted-message application with Turkish and English interfaces and an optional advanced audio editor. All audio processing, editing, encryption and decoding run locally in the browser. Visual styling follows the supplied [Dribbble reference](https://dribbble.com/shots/27899319-AI-Cybersecurity-website).
 
 ## Run locally
 
@@ -30,7 +30,7 @@ The [Figma file](https://www.figma.com/design/CLb4yxWNUk33Qe5yxZ93BQ) contains t
 
 | URL | Page |
 | --- | --- |
-| `/` | File import and tool selection |
+| `/` | Message encryption and decoding entry points |
 | `/studio` | Audio studio |
 | `/encode` | Message encryption |
 | `/decode` | Message decoding and file inspection |
@@ -38,7 +38,7 @@ The [Figma file](https://www.figma.com/design/CLb4yxWNUk33Qe5yxZ93BQ) contains t
 
 Each page has its own URL. Internal navigation and browser back/forward preserve the in-memory working audio. Refreshing or closing the page clears the session. The included `public/.htaccess` configures Hostinger's static hosting to serve `index.html` for application routes. Vite's development and preview servers already do this. The old `/#workspace` address opens `/studio`.
 
-The homepage retains the sound sculpture, waveform artwork and spacious visual layout, with direct access to each tool. Website copy contains practical usage instructions, without promotional sections or explanations of the underlying method. Implementation details remain in repository documentation.
+The homepage retains the rotating sound sculpture and flowing strands, with message encryption and decoding as the primary actions. The sound studio is available under Advanced. The brand is written `noktava.`, including the period. Website copy contains practical usage instructions, without promotional sections or explanations of the underlying method. Implementation details remain in repository documentation.
 
 ## Audio studio
 
