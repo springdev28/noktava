@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 
-/** Fine, flexible strands carrying a travelling wave between two fixed ends. */
+/** The original rotating sound sculpture, with a travelling flow through its strands. */
 export function SoundSculpture() {
   const ref = useRef<HTMLCanvasElement>(null)
   useEffect(() => {
@@ -9,71 +9,70 @@ export function SoundSculpture() {
     const context = canvas.getContext('2d')
     if (!context) return
     const reduced = matchMedia('(prefers-reduced-motion: reduce)')
-    const steps = 160, strandCount = 64, tau = Math.PI * 2
-    const positions = Array.from({ length: steps + 1 }, (_, i) => {
-      const s = i / steps
-      return { s, envelope: i === 0 || i === steps ? 0 : Math.pow(Math.sin(Math.PI * s), .72) }
-    })
-    const strands = Array.from({ length: strandCount }, (_, i) => {
-      const angle = i / strandCount * tau
-      return { i, across: Math.cos(angle), depth: Math.sin(angle) }
-    }).sort((a, b) => a.depth - b.depth)
     let frame = 0, elapsed = 0, previousTime: number | null = null
     let visible = true, width = 620, height = 560
 
     const draw = (seconds: number) => {
       context.clearRect(0, 0, width, height)
-      const phase = seconds * 1.6
-      // The camera stays fixed. Displacement travels along the string itself.
-      const curve = positions.map(({ s, envelope }) => {
-        const displacement = .64 * Math.sin(tau * s - phase + .45)
-          + .19 * Math.sin(2 * tau * s + phase * .68 + .8)
-        const twist = 2.7 * Math.sin(Math.PI * s) + .38 * Math.sin(tau * s - phase * .7)
-        return {
-          s,
-          y: envelope * displacement,
-          z: envelope * .27 * Math.sin(tau * s - phase * .8 + 1.2),
-          radius: envelope * (.14 + .025 * Math.sin(tau * s - phase)),
-          cosine: Math.cos(twist), sine: Math.sin(twist),
-        }
-      })
-      const project = (point: typeof curve[number], across: number, depth: number) => {
-        const y = point.y + point.radius * (across * point.cosine - depth * point.sine * .65)
-        const z = point.z + point.radius * (across * point.sine + depth * point.cosine * .65)
-        const perspective = 1 + z * .12
-        return {
-          x: width * .5 + (point.s - .5) * width * .83 * perspective,
-          y: height * .49 + (y * height * .45 + (point.s - .5) * height * .08) * perspective,
+      const size = Math.min(width, height) * 0.36
+      // Preserve the original rotation speed, axis and folded silhouette.
+      const rotation = seconds * 0.06 + 0.27
+      const flow = seconds * .9, blend = Math.min(1, seconds / .8)
+      const cx = width / 2, cy = height / 2
+      const project = (along: number, around: number) => {
+        // A small travelling bend moves through each filament on the original form.
+        const u = along + blend * .045 * Math.sin(2 * along + 3 * around - flow * 1.4)
+        const v = around + blend * .12 * Math.sin(2 * along - flow)
+        const ripple = blend * .022 * Math.sin(3 * along + 2 * around - flow * 1.8)
+        const tube = 0.39 + 0.1 * Math.cos(3 * u + rotation) + ripple
+        const r = 0.88 + tube * Math.cos(v)
+        const x = r * Math.cos(u), y = r * Math.sin(u), z = tube * Math.sin(v) + 0.15 * Math.sin(3 * u)
+        const ry = y * Math.cos(rotation) - z * Math.sin(rotation)
+        const rz = y * Math.sin(rotation) + z * Math.cos(rotation)
+        const tilt = 0.7
+        const rx = x * Math.cos(tilt) + rz * Math.sin(tilt)
+        const depth = -x * Math.sin(tilt) + rz * Math.cos(tilt)
+        const perspective = 3.7 / (3.7 - depth)
+        return { x: cx + rx * size * perspective, y: cy + ry * size * perspective * 0.95, depth }
+      }
+      // Fine ribbons create the metallic, woven surface of the wave.
+      for (let ring = 0; ring < 100; ring++) {
+        const u = ring / 100 * Math.PI * 2 + blend * flow * .12
+        for (let section = 0; section < 5; section++) {
+          const start = section / 5 * Math.PI * 2
+          const depth = project(u, start + 0.6).depth
+          const light = Math.max(0, Math.min(1, (depth + 1.3) / 2.6))
+          const lit = Math.pow(light, 2.1)
+          context.beginPath()
+          for (let j = 0; j <= 18; j++) {
+            const p = project(u, start + j / 18 * Math.PI * 2 / 5)
+            if (j === 0) context.moveTo(p.x, p.y)
+            else context.lineTo(p.x, p.y)
+          }
+          context.strokeStyle = `rgba(${Math.round(85 + 170 * lit)},${Math.round(67 + 137 * lit)},${Math.round(42 + 117 * lit)},${0.13 + light * 0.71})`
+          context.lineWidth = 0.45 + lit * 1.2
+          context.stroke()
         }
       }
-      // Each filament follows the same travelling displacement with its own depth.
-      for (const strand of strands) {
-        const light = (strand.depth + 1) / 2
-        const accent = strand.i % 19 === 0
+      // Cyan tracer filaments and quiet nodes along the surface.
+      for (let j = 0; j < 8; j++) {
+        const v = j / 8 * Math.PI * 2 + 0.2 + blend * flow * .24
         context.beginPath()
-        curve.forEach((point, index) => {
-          const p = project(point, strand.across, strand.depth)
-          if (index === 0) context.moveTo(p.x, p.y)
-          else context.lineTo(p.x, p.y)
-        })
-        context.strokeStyle = accent
-          ? 'rgba(120, 217, 181, .55)'
-          : `rgba(${Math.round(130 + light * 125)},${Math.round(82 + light * 116)},${Math.round(45 + light * 95)},${.19 + light * .55})`
-        context.lineWidth = accent ? 1.1 : .55 + light * .65
-        context.stroke()
-      }
-      // Sparse cross threads retain the woven texture without creating a rigid mesh.
-      context.strokeStyle = 'rgba(255, 179, 138, .12)'
-      context.lineWidth = .6
-      for (let index = 4; index < steps; index += 4) {
-        context.beginPath()
-        for (let j = 0; j <= 24; j++) {
-          const angle = j / 24 * tau, p = project(curve[index], Math.cos(angle), Math.sin(angle))
-          if (j === 0) context.moveTo(p.x, p.y)
-          else context.lineTo(p.x, p.y)
+        for (let k = 0; k <= 150; k++) {
+          const p = project(k / 150 * Math.PI * 2, v)
+          if (k === 0) context.moveTo(p.x, p.y); else context.lineTo(p.x, p.y)
         }
-        context.stroke()
+        context.strokeStyle = j % 3 === 0 ? 'rgba(255, 133, 74, 0.38)' : 'rgba(120, 217, 181, 0.18)'
+        context.lineWidth = 0.65; context.stroke()
       }
+      for (let j = 0; j < 17; j++) {
+        const p = project(j * 2.399 + blend * flow * .22, j * 1.8 + blend * flow * .45)
+        if (p.depth < 0.2) continue
+        context.fillStyle = 'rgba(255,179,138,0.9)'
+        context.shadowColor = '#ff854a'; context.shadowBlur = 9
+        context.fillRect(p.x - 1.2, p.y - 1.2, 2.4, 2.4)
+      }
+      context.shadowBlur = 0
     }
 
     const animate = (timestamp: number) => {
